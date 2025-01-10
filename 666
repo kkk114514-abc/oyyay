@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Drawing with Save and Color Change</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            display: block;
+            margin-top: 20px;
+        }
+        .controls {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    // 获取画布元素
+    const canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    // 自动调整画布大小
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let drawing = false;  // 控制绘图状态
+    let prevX = null;
+    let prevY = null;
+
+    // 默认颜色
+    let color = 'black';
+
+    // 创建保存图片按钮
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save Image';
+    saveButton.className = 'controls';
+    document.body.appendChild(saveButton);
+
+    saveButton.addEventListener('click', () => {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'drawing.png';
+        link.click();
+    });
+
+    // 创建颜色选择器
+    const colorPicker = document.createElement('select');
+    colorPicker.className = 'controls';
+    const colors = ['black', 'red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'brown', 'gray'];
+    colors.forEach(col => {
+        const option = document.createElement('option');
+        option.value = col;
+        option.textContent = col;
+        colorPicker.appendChild(option);
+    });
+    document.body.appendChild(colorPicker);
+
+    colorPicker.addEventListener('change', (e) => {
+        color = e.target.value;
+    });
+
+    // 鼠标按下时开始绘制
+    canvas.addEventListener('mousedown', () => {
+        drawing = true;
+        prevX = null;
+        prevY = null;
+    });
+
+    // 鼠标释放时停止绘制
+    canvas.addEventListener('mouseup', () => {
+        drawing = false;
+    });
+
+    // 鼠标移动时绘制线条
+    canvas.addEventListener('mousemove', (e) => {
+        if (!drawing) return;
+
+        const x = e.clientX;
+        const y = e.clientY;
+
+        if (prevX !== null && prevY !== null) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;  // 设置线条宽度
+            ctx.lineCap = 'round';  // 设置线条端点样式
+            ctx.lineJoin = 'round';  // 线条连接样式
+            ctx.moveTo(prevX, prevY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        prevX = x;
+        prevY = y;
+    });
+
+    // 处理触摸屏
+    canvas.addEventListener('touchstart', () => {
+        drawing = true;
+        prevX = null;
+        prevY = null;
+    });
+
+    canvas.addEventListener('touchend', () => {
+        drawing = false;
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+        if (!drawing) return;
+
+        const touch = e.touches[0];
+        const x = touch.clientX;
+        const y = touch.clientY;
+
+        if (prevX !== null && prevY !== null) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.moveTo(prevX, prevY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+
+        prevX = x;
+        prevY = y;
+    });
+
+    // 清除画布
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+</script>
+
+</body>
+</html>
